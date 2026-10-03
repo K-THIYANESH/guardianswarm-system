@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian Swarm — Enterprise AI Security</title>
+    <meta name="description" content="Enterprise AI OS - Zero-trust governed AI workspace with real-time security gates.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=3.0.6">
+</head>
+<body class="app-body">
+    <!-- TOP BAR (48px Fixed) -->
+    <header class="top-bar">
+        <!-- LEFT SECTION -->
+        <div class="top-left">
+            <button id="top-toggle-left-sidebar" class="top-bar-toggle-btn" title="Toggle Sidebar">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+            </button>
+            <div class="brand">
+                <svg class="svg-icon shield-logo" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span class="brand-title">Guardian Swarm</span>
+            </div>
+        </div>
+
+        <!-- CENTRE SECTION: Compact Status Pill -->
+        <div class="top-centre">
+            <div id="top-gate-pill" class="gate-status-pill all-good" title="Click to view gate status details">
+                <span class="status-dot"></span>
+                <span>🛡 All systems secured</span>
+            </div>
+        </div>
+
+        <!-- Floating Gate Popover Container -->
+        <div id="gate-popover" class="gate-popover hidden">
+            <div class="popover-title">Security Gate Overview</div>
+            <div id="gate-popover-list" class="popover-gate-list">
+                <!-- Dynamically rendered rows -->
+            </div>
+        </div>
+
+        <!-- RIGHT SECTION -->
+        <div class="top-right">
+            <!-- Token Wallet Pill (Fixed 200px width) -->
+            <div class="wallet-pill" id="wallet-pill" title="Click for budget details">
+                <div class="wallet-bar-mini"><div class="wallet-fill" id="top-wallet-fill" style="width: 88%;"></div></div>
+                <span id="top-wallet-text">6,800 / 10,000 tokens</span>
+            </div>
+
+            <!-- Wallet Popover -->
+            <div id="wallet-popover" class="wallet-popover hidden">
+                <div class="popover-title">Usage & Budget Allocation</div>
+                <div class="popover-row"><span>Your wallet:</span> <strong id="pop-user-wallet">3,200 / 10,000</strong></div>
+                <div class="popover-row"><span>Team pool:</span> <strong id="pop-team-wallet">8,400 / 50,000</strong></div>
+                <div class="popover-row"><span>Org ceiling:</span> <strong id="pop-org-wallet">33,600 / 5,000,000</strong></div>
+            </div>
+
+            <!-- Role Badge Pill -->
+            <span class="role-pill role-intern" id="top-role-pill">INTERN</span>
+
+            <!-- Identity Selector Dropdown -->
+            <div class="identity-selector-box">
+                <select id="user-role-select" class="top-select-dropdown" title="Switch active corporate session">
+                    <option value="intern_user"   data-role="INTERN"   data-name="INTERN"   data-dept="Engineering" selected>INTERN</option>
+                    <option value="employee_user" data-role="EMPLOYEE" data-name="EMPLOYEE" data-dept="Engineering">EMPLOYEE</option>
+                    <option value="manager_user"  data-role="MANAGER"  data-name="MANAGER"  data-dept="Engineering">MANAGER</option>
+                    <option value="exec_user"     data-role="EXEC"     data-name="EXEC"     data-dept="Leadership">EXEC</option>
+                    <option value="admin_user"    data-role="ADMIN"    data-name="ADMIN"    data-dept="IT Security">ADMIN</option>
+                </select>
+            </div>
+
+            <!-- Settings Icon -->
+            <button id="btn-open-settings" class="top-btn" title="Settings">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+            </button>
+
+            <!-- User Avatar Circle -->
+            <div class="user-avatar-circle" id="top-user-avatar">AC</div>
+
+            <!-- Right Swarm Panel Toggle Button -->
+            <button id="top-toggle-right-sidebar" class="top-bar-toggle-btn" title="Toggle Telemetry Panel">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- THREE-PANEL LAYOUT CONTAINER -->
+    <div class="app-container">
+        <!-- LEFT: SIDEBAR (260px) -->
+        <aside id="sidebar-left" class="history-sidebar">
+            <div class="sidebar-top">
+                <button id="btn-new-chat" class="new-chat-btn">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    New chat
+                </button>
+                <div class="search-box">
+                    <svg class="svg-icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="search-conversations" placeholder="Search conversations...">
+                </div>
+            </div>
+
+            <!-- Conversation List -->
+            <div class="conversation-list" id="conversation-list"></div>
+
+            <!-- Bottom Nav Links -->
+            <div class="sidebar-bottom-nav">
+                <button class="side-nav-item active" data-view="chat-main" id="nav-chat-link">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Workspace</span>
+                </button>
+                <button class="side-nav-item" data-view="escalations">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span>Escalations</span>
+                    <span class="nav-badge" id="sidebar-escalation-badge">0</span>
+                </button>
+                <button class="side-nav-item" data-view="ledger">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    <span>Audit Ledger</span>
+                </button>
+                <button class="side-nav-item manager-only-link" data-view="admin" id="sidebar-admin-link">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <span>Admin</span>
+                </button>
+            </div>
+            
+            <!-- Left Collapse Control -->
+            <button id="btn-toggle-left-sidebar" class="sidebar-collapse-btn left-collapse" title="Toggle Sidebar">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+        </aside>
+
+        <!-- CENTER AREA: CHAT PANEL OR FULL-PAGE VIEWS -->
+        <main class="center-main-area">
+            <!-- CHAT PANEL VIEW -->
+            <div id="view-chat-main" class="main-view active">
+                <!-- Chat Messages Scroll Container -->
+                <div class="chat-messages-area" id="chat-messages-area">
+                    <!-- EMPTY STATE -->
+                    <div id="chat-empty-state" class="empty-state">
+                        <div class="empty-shield">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            </svg>
+                        </div>
+                        <h2 class="empty-state-title">What can I help you with today?</h2>
+                        <p class="empty-state-subtitle" id="empty-user-context">INTERN · 6,800 tokens remaining</p>
+
+                        <div class="suggestion-chips">
+                            <button class="suggestion-chip" data-prompt="Research recent market trends in quantum computing software.">
+                                <span>🔍</span>
+                                <span>Research</span>
+                            </button>
+                            <button class="suggestion-chip" data-prompt="Write a Python script to validate SHA-256 hash chains across audit logs.">
+                                <span>💻</span>
+                                <span>Write Code</span>
+                            </button>
+                            <button class="suggestion-chip" data-prompt="Draft an executive summary document for Q4 budget allocations.">
+                                <span>✍️</span>
+                                <span>Draft</span>
+                            </button>
+                            <button class="suggestion-chip" data-prompt="Analyze internal sales metrics data and generate a performance report.">
+                                <span>📊</span>
+                                <span>Analyse Data</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Messages list rendered here -->
+                    <div id="messages-list" class="messages-list"></div>
+                </div>
+
+                <!-- Thinking / Activity Indicator Bar -->
+                <div id="thinking-indicator" class="thinking-bar hidden">
+                    <div id="thinking-steps-list" class="thinking-steps"></div>
+                </div>
+
+                <!-- Banner warnings for classification -->
+                <div id="classification-warning-banner" class="classification-banner hidden"></div>
+
+                <!-- UNIFIED CHAT INPUT BAR CONTAINER -->
+                <div class="chat-input-container">
+                    <textarea id="chat-prompt-input" class="chat-input-textarea" placeholder="Ask the swarm anything..." rows="1"></textarea>
+                    
+                    <div class="chat-input-action-bar">
+                        <button id="btn-attach-file" class="input-tool-btn" title="Attach file">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                            <input type="file" id="file-input-hidden" style="display:none;">
+                        </button>
+
+                        <div class="input-controls-group">
+                            <select id="chat-task-category" class="chat-select">
+                                <option value="RESEARCH" selected>Research</option>
+                                <option value="CODE">Write Code</option>
+                                <option value="DRAFTING">Draft Document</option>
+                                <option value="SUPPORT">Support</option>
+                                <option value="DATA_ANALYSIS">Data Analysis</option>
+                            </select>
+
+                            <select id="chat-data-classification" class="chat-select">
+                                <option value="Public" selected>Classification: Public</option>
+                                <option value="Internal">Classification: Internal</option>
+                                <option value="Sensitive">Classification: Confidential</option>
+                                <option value="Restricted">Classification: Restricted</option>
+                            </select>
+
+                            <select id="chat-priority" class="chat-select">
+                                <option value="Normal" selected>Priority: Normal</option>
+                                <option value="Urgent">Priority: Urgent</option>
+                            </select>
+                        </div>
+
+                        <div class="token-status" id="chat-token-status">
+                            ~6,800 tokens remaining
+                        </div>
+
+                        <button id="btn-send-message" class="btn-send-orange" title="Send message">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FULL-PAGE VIEW 1: ESCALATIONS QUEUE -->
+            <div id="view-escalations" class="main-view hidden-view">
+                <div class="full-view-header">
+                    <h2>Escalations <span class="header-badge" id="escalation-header-count">0 pending review</span></h2>
+                </div>
+                <div class="escalations-page-list" id="escalations-page-container"></div>
+            </div>
+
+            <!-- FULL-PAGE VIEW 2: AUDIT LEDGER -->
+            <div id="view-ledger" class="main-view hidden-view">
+                <div class="full-view-header">
+                    <h2>Audit Ledger <span class="sub-info" id="ledger-stats-text">0 blocks verified</span></h2>
+                </div>
+                <div class="ledger-page-blocks" id="ledger-page-list"></div>
+            </div>
+
+            <!-- FULL-PAGE VIEW 3: ADMIN PANEL -->
+            <div id="view-admin" class="main-view hidden-view">
+                <div class="full-view-header">
+                    <h2>Admin Panel <span class="role-pill role-exec" id="admin-view-role-pill">EXEC</span></h2>
+                </div>
+                <div class="admin-layout-box">
+                    <div class="admin-side-tabs">
+                        <button class="admin-side-tab active" data-admintab="admintab-apikeys">API Keys</button>
+                        <button class="admin-side-tab" data-admintab="admintab-models">Models</button>
+                        <button class="admin-side-tab" data-admintab="admintab-groups">Groups</button>
+                        <button class="admin-side-tab" data-admintab="admintab-roles">Roles & Permissions</button>
+                        <button class="admin-side-tab" data-admintab="admintab-budget">Budget</button>
+                        <button class="admin-side-tab" data-admintab="admintab-users">Users</button>
+                        <button class="admin-side-tab" data-admintab="admintab-health">System Health</button>
+                        <button class="admin-side-tab" data-admintab="admintab-datascanner">Data Scanner</button>
+                    </div>
+                    <div class="admin-tab-body">
+                        <div id="admintab-apikeys" class="admintab-content active">
+                            <div class="admin-section-title">Provider API Key Registrations</div>
+                            <div class="api-keys-grid" id="api-keys-list"></div>
+                        </div>
+                        <div id="admintab-models" class="admintab-content">
+                            <div class="admin-section-title">Model Registry & File Access Governance</div>
+                            <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+                                <thead>
+                                    <tr style="text-align:left; border-bottom:1px solid #2a2a2a; color:var(--text-muted);">
+                                        <th style="padding:0.5rem;">Name</th>
+                                        <th>Provider</th>
+                                        <th>Type</th>
+                                        <th>Group</th>
+                                        <th>Cost / 1M</th>
+                                        <th>File Access</th>
+                                        <th>Permitted Guardian Tags</th>
+                                        <th>Ops</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-models-tbody"></tbody>
+                            </table>
+                        </div>
+                        <div id="admintab-groups" class="admintab-content">
+                            <div class="admin-section-title">Model Group Configuration & Tool Boundaries</div>
+                            <div id="admin-groups-list"></div>
+                        </div>
+                        <div id="admintab-roles" class="admintab-content">
+                            <div class="admin-section-title">Role Permissions Matrix</div>
+                            <div id="admin-roles-list"></div>
+                        </div>
+                        <div id="admintab-budget" class="admintab-content">
+                            <div class="admin-section-title">Team Budget Pools & Org Ceiling</div>
+                            <div id="admin-budget-list"></div>
+                        </div>
+                        <div id="admintab-users" class="admintab-content">
+                            <div class="admin-section-title">User Accounts & Budget Caps</div>
+                            <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+                                <thead>
+                                    <tr style="text-align:left; border-bottom:1px solid #2a2a2a; color:var(--text-muted);">
+                                        <th style="padding:0.5rem;">User</th>
+                                        <th>Role</th>
+                                        <th>Department</th>
+                                        <th>Wallet Usage</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-list-tbody"></tbody>
+                            </table>
+                        </div>
+                        <div id="admintab-health" class="admintab-content">
+                            <div class="admin-section-title">System Health & Telemetry Metrics</div>
+                            <div id="admin-health-metrics"></div>
+                        </div>
+                        <div id="admintab-datascanner" class="admintab-content">
+                            <div class="admin-section-title">FileMind Content-Aware Data Scanner</div>
+                            <div class="glass-card" style="padding:1.25rem; margin-bottom:1.5rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px;">
+                                <div style="display:flex; gap:1rem; align-items:center; margin-bottom:1rem;">
+                                    <input type="text" id="scan-folder-path" class="text-input" placeholder="/data/legacy_docs" value="/data/legacy_docs" style="flex:1; padding:0.5rem 0.75rem; background:#18181b; border:1px solid #27272a; border-radius:4px; color:#fff;">
+                                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--text-muted); cursor:pointer;">
+                                        <input type="checkbox" id="scan-dry-run" checked> Dry Run
+                                    </label>
+                                    <button id="btn-start-scan" class="btn-primary" style="padding:0.5rem 1.25rem; background:var(--accent-color, #3b82f6); border:none; border-radius:4px; color:#fff; font-weight:600; cursor:pointer;">Start Classification Scan</button>
+                                </div>
+                                <div id="scan-progress-box" class="hidden" style="margin-top:1rem;">
+                                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">
+                                        <span id="scan-status-text">Scanning...</span>
+                                        <span id="scan-counts-text">Processed: 0 / 0</span>
+                                    </div>
+                                    <div style="width:100%; height:8px; background:#27272a; border-radius:4px; overflow:hidden;">
+                                        <div id="scan-progress-bar" style="width:0%; height:100%; background:var(--accent-color, #3b82f6); transition:width 0.3s;"></div>
+                                    </div>
+                                    <div style="display:flex; gap:1.5rem; font-size:0.8rem; margin-top:0.6rem; color:var(--text-secondary);">
+                                        <span>Cached: <strong id="scan-stat-cached">0</strong></span>
+                                        <span>New: <strong id="scan-stat-new">0</strong></span>
+                                        <span>Failed: <strong id="scan-stat-failed">0</strong></span>
+                                        <span style="flex:1; text-align:right; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">Last: <span id="scan-stat-last">-</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+                                <thead>
+                                    <tr style="text-align:left; border-bottom:1px solid #2a2a2a; color:var(--text-muted);">
+                                        <th style="padding:0.5rem;">File Path</th>
+                                        <th>FileMind Category</th>
+                                        <th>Guardian Tag</th>
+                                        <th>Cache</th>
+                                        <th>Last Scanned</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-scanner-tbody">
+                                    <tr><td colspan="5" style="padding:1rem; text-align:center; color:var(--text-muted);">No scan results yet. Enter a folder path and click Start Classification Scan.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT: TELEMETRY & SWARM PANEL (380px) -->
+        <aside id="sidebar-right" class="swarm-panel">
+            <div class="swarm-tabs">
+                <button class="swarm-tab-btn active" data-tab="tab-swarm-trace">Gate Trace</button>
+                <button class="swarm-tab-btn" data-tab="tab-swarm-agents">Group Info</button>
+            </div>
+            <div class="swarm-content">
+                <div id="tab-swarm-trace" class="swarm-tab-content active">
+                    <div class="swarm-header-row">
+                        <span class="swarm-title">Live Gate Trace</span>
+                        <span class="status-pill pill-idle" id="swarm-status-pill">IDLE</span>
+                    </div>
+
+                    <div id="swarm-idle-view" class="swarm-idle-view">
+                        <div class="idle-text">Real-time gate telemetry updates when tasks are submitted.</div>
+                        <div class="session-stats-box">
+                            <div class="stat-row"><span>Tasks Processed:</span> <strong id="stat-tasks-completed">0</strong></div>
+                            <div class="stat-row"><span>Tokens Allocated:</span> <strong id="stat-tokens-used">0</strong></div>
+                            <div class="stat-row"><span>Security Checks:</span> <strong id="stat-gate-interventions">0</strong></div>
+                        </div>
+
+                        <div class="session-stats-box" style="margin-top:0.75rem;">
+                            <div style="font-weight:600; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.4rem; text-transform:uppercase;">Classification Summary</div>
+                            <div class="stat-row"><span>Total Classified:</span> <strong id="stat-total-classified">0</strong></div>
+                            <div class="stat-row"><span>PUBLIC / INTERNAL:</span> <strong id="stat-public-internal">0 / 0</strong></div>
+                            <div class="stat-row"><span>CONFIDENTIAL / RESTRICTED:</span> <strong id="stat-confidential-restricted">0 / 0</strong></div>
+                            <div class="stat-row"><span>Scanner Errors:</span> <strong id="stat-scanner-errors" style="color:#ef4444;">0</strong></div>
+                        </div>
+                    </div>
+
+                    <div id="agent-cards-container"></div>
+                    <div id="gate-trace-accordion"></div>
+                </div>
+
+                <div id="tab-swarm-agents" class="swarm-tab-content">
+                    <div class="swarm-header-row">
+                        <span class="swarm-title">Model Groups & Scope</span>
+                    </div>
+                    <div id="agent-groups-info-list"></div>
+                </div>
+            </div>
+
+            <!-- Right Collapse Control -->
+            <button id="btn-toggle-right-sidebar" class="sidebar-collapse-btn right-collapse" title="Toggle Telemetry Panel">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+        </aside>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="settings-modal-box" style="width: 760px; max-width: 95vw;">
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                    <h3 style="font-size:1.1rem; font-weight:700;">Workspace Settings</h3>
+                </div>
+                <button id="close-settings-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="settings-layout">
+                <div class="settings-nav">
+                    <button class="settings-nav-btn active" data-tab="general">
+                        <span>⚙️</span> General
+                    </button>
+                    <button class="settings-nav-btn" data-tab="security">
+                        <span>🔑</span> Security & API Keys
+                    </button>
+                    <button class="settings-nav-btn" data-tab="models">
+                        <span>🧠</span> Model Engine
+                    </button>
+                </div>
+                <div class="settings-body">
+                    <!-- GENERAL TAB -->
+                    <div id="settings-tab-general" class="settab-content active">
+                        <h4 style="font-size:0.95rem; font-weight:700; color:#fff; margin-bottom:0.6rem;">General Workspace Settings</h4>
+                        
+                        <div class="glass-card" style="padding:0.9rem 1.1rem; margin-bottom:1.2rem; background:rgba(34, 197, 94, 0.08); border:1px solid rgba(34, 197, 94, 0.2); border-radius:8px;">
+                            <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; font-weight:600; color:#4ade80; margin-bottom:0.3rem;">
+                                <span>●</span> <span>Zero-Trust Local Engine Operational</span>
+                            </div>
+                            <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.4;">
+                                Guardian Swarm V3 is active in standalone local mode. All 3-agent prosecutor/defender security debates run locally on your system. <strong>No API keys are required to use the workspace.</strong>
+                            </p>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:1rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:0.8rem; border-bottom:1px solid #222;">
+                                <div>
+                                    <div style="font-size:0.85rem; font-weight:600; color:#fff;">UI Theme</div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted);">Customize workspace visual mode</div>
+                                </div>
+                                <select id="setting-ui-theme" class="top-select-dropdown" style="padding:0.3rem 0.6rem;">
+                                    <option value="dark" selected>Dark Glassmorphism (Default)</option>
+                                    <option value="cyberpunk">Cyberpunk High Contrast</option>
+                                </select>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:0.8rem; border-bottom:1px solid #222;">
+                                <div>
+                                    <div style="font-size:0.85rem; font-weight:600; color:#fff;">SSE Telemetry Auto-Poll Rate</div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted);">Real-time stream update interval for gate stats</div>
+                                </div>
+                                <select id="setting-poll-rate" class="top-select-dropdown" style="padding:0.3rem 0.6rem;">
+                                    <option value="3000" selected>3 Seconds (Recommended)</option>
+                                    <option value="5000">5 Seconds</option>
+                                    <option value="10000">10 Seconds</option>
+                                </select>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:0.8rem; border-bottom:1px solid #222;">
+                                <div>
+                                    <div style="font-size:0.85rem; font-weight:600; color:#fff;">Cryptographic Audit Chain</div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted);">Verify SHA-256 tamper-evident audit ledger</div>
+                                </div>
+                                <button type="button" class="btn btn-secondary btn-mini" onclick="window.runLedgerVerification && window.runLedgerVerification()">
+                                    🔍 Verify Ledger
+                                </button>
+                            </div>
+
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem; line-height:1.4;">
+                                Guardian Swarm Version: <strong>3.0.0 Enterprise</strong> · Build: <strong>2026.10</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECURITY & API KEYS TAB -->
+                    <div id="settings-tab-security" class="settab-content hidden">
+                        <h4 style="font-size:0.95rem; font-weight:700; color:#fff; margin-bottom:0.6rem;">Security & Cloud API Keys</h4>
+                        
+                        <div class="glass-card" style="padding:0.9rem 1.1rem; margin-bottom:1.2rem; background:rgba(59, 130, 246, 0.08); border:1px solid rgba(59, 130, 246, 0.2); border-radius:8px;">
+                            <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; font-weight:600; color:#60a5fa; margin-bottom:0.3rem;">
+                                <span>ℹ️</span> <span>Are API Keys Required?</span>
+                            </div>
+                            <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.4;">
+                                <strong>No!</strong> Guardian Swarm works 100% out-of-the-box using the built-in <strong>Heuristic Safety Debate Engine</strong>. Adding provider API keys below is completely optional if you wish to hook external LLMs (OpenAI, Anthropic, Gemini, Grok, etc.) into the verification pipeline.
+                            </p>
+                        </div>
+
+                        <!-- Rendered API Keys Form & Table -->
+                        <div id="modal-apikeys-container"></div>
+                    </div>
+
+                    <!-- MODEL ENGINE TAB -->
+                    <div id="settings-tab-models" class="settab-content hidden">
+                        <h4 style="font-size:0.95rem; font-weight:700; color:#fff; margin-bottom:0.6rem;">Model Verification Engine</h4>
+
+                        <div class="glass-card" style="padding:0.9rem 1.1rem; margin-bottom:1.2rem; background:rgba(249, 115, 22, 0.08); border:1px solid rgba(249, 115, 22, 0.2); border-radius:8px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.4rem;">
+                                <span style="font-size:0.82rem; font-weight:600; color:var(--color-orange);">Current Active Engine</span>
+                                <span id="modal-engine-badge" class="badge badge-success">HEURISTICS ENGINE</span>
+                            </div>
+                            <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.4;">
+                                Automatic fallback mode active. Evaluation latency is ~0 ms with 100% zero-token cost.
+                            </p>
+                        </div>
+
+                        <div style="margin-bottom:1rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                                <span style="font-size:0.85rem; font-weight:600; color:#fff;">Local Server Auto-Discovery</span>
+                                <button type="button" class="btn btn-primary btn-mini" onclick="scanLocalModelServers()">
+                                    🔄 Scan Local Servers (Ollama / LM Studio)
+                                </button>
+                            </div>
+                            <div id="modal-model-scan-results" style="font-size:0.78rem; color:var(--text-muted); padding:0.6rem; background:#0f0f10; border:1px solid #222; border-radius:6px;">
+                                Click scan to probe for Ollama (11434), LM Studio (1234), or vLLM (8000).
+                            </div>
+                        </div>
+
+                        <div style="margin-top:1.2rem;">
+                            <div style="font-size:0.85rem; font-weight:600; color:#fff; margin-bottom:0.6rem;">Registered Model Registry</div>
+                            <div id="modal-registered-models-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RAW LEDGER PROOF MODAL -->
+    <div id="ledger-modal" class="modal-overlay hidden">
+        <div class="settings-modal-box" style="width: 550px;">
+            <div class="modal-header">
+                <h3>Cryptographic Block Proof</h3>
+                <button id="close-ledger-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div style="padding:1.2rem;">
+                <div class="fira-code-box" id="raw-ledger-json"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/api.js') }}?v=3.0.6"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}?v=3.0.6"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}?v=3.0.6"></script>
+</body>
+</html>

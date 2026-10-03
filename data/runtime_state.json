@@ -1,0 +1,9 @@
+{
+    "engine_type": "heuristics",
+    "device": "cpu",
+    "model_name": "microsoft/Phi-3.5-mini-instruct",
+    "is_fallback": false,
+    "connected_server": null,
+    "connected_url": "",
+    "connected_model": ""
+}
